@@ -1,0 +1,13 @@
+backend/node_modules/
+
+.idea/
+*.iml
+
+.env
+
+dist/
+build/
+out/
+
+.DS_Store
+Thumbs.db
