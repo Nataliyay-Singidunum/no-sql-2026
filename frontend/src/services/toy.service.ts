@@ -1,0 +1,38 @@
+import axios from 'axios';
+import { ToyModel } from '../models/toy.model';
+import { TypeModel } from '../models/type.model';
+import { AgeGroupModel } from '../models/age-group';
+
+const client = axios.create({
+  baseURL: 'http://localhost:3000/api',
+  headers: {
+    Accept: 'application/json',
+    'X-Name': 'ICR2026',
+  },
+});
+
+
+export class ToyService {
+  static async getToys(search: string = '', genre: number = 0) {
+    return client.request<ToyModel[]>({
+      url: '/toy',
+      method: 'GET',
+      params: {
+        search: search,
+        genre: genre,
+      },
+    });
+  }
+
+  static async getToyByPermalink(permalink: string) {
+    return client.get<ToyModel>(`/toy/permalink/${permalink}`);
+  }
+
+  static async getToyTypes() {
+    return client.get<TypeModel[]>('/type');
+  }
+
+  static async getToyAgeGroups() {
+    return client.get<AgeGroupModel[]>('/age-group');
+  }
+}

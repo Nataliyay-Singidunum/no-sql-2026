@@ -1,0 +1,20 @@
+.toys{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+
+}
+
+.toys .card{
+  max-width: 240px;
+}
+
+.toys .btn-group{
+  display: flex;
+  justify-content: flex-end;
+}
+
+.input-group{
+  max-width: 320px;
+}

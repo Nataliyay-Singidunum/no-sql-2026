@@ -1,0 +1,217 @@
+<div class="card mb-3 mt-3">
+  <div class="card-header" style="background: rgb(185 32 107 / 0.1)">
+    <h5>User Details</h5>
+  </div>
+  <div class="card-body mb-3">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <table class="table" style="border-color: rgb(185 32 107 / 0.2)">
+          <tbody>
+            <tr>
+              <td> First Name:</td>
+              <td>{{activeUser()?.firstName}}</td>
+            </tr>
+            <tr>
+              <td> Last Name:</td>
+              <td>{{activeUser()?.lastName}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-12 col-md-6">
+        <table class="table" style="border-color: rgb(185 32 107 / 0.2)">
+          <tbody>
+          <tr>
+            <td> Email:</td>
+            <td>{{activeUser()?.email}}</td>
+          </tr>
+          <tr>
+            <td> Phone:</td>
+            <td>{{activeUser()?.phone}}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="d-flex gap-3 flex-wrap">
+      <p class="p-0 m-0 mx-2 text-capitalize">Favorite toy types: </p>
+      @for (type of activeUser()?.favoriteTypes; track $index) {
+        <p class="badge rounded-pill p-2 px-3 m-0" style="background: #f8e9f1; color: #b9206b">{{ type }}</p>
+      }
+
+
+      <div style="position: relative;">
+        <button class="badge rounded-pill p-2 px-3 m-0 border-0"
+                style="background: #f8e9f1; color: #b9206b; cursor: pointer;"
+                (click)="toggleAddMenu()">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+        @if (showAddMenu) {
+          <div class="dropdown-menu show shadow-sm" style="position: absolute; top: 120%; left: 0; z-index: 1000; min-width: 150px;">
+            @if (getAvailableTypes().length > 0) {
+              @for (availableType of getAvailableTypes(); track $index) {
+                <button type="button" class="dropdown-item" (click)="addFavoriteType(availableType)">
+                  {{ availableType }}
+                </button>
+              }
+            } @else {
+              <div class="p-2 text-muted text-center" style="font-size: 10pt;">All types already added!</div>
+            }
+          </div>
+        }
+    </div>
+      <div style="position: relative;">
+        <button class="badge rounded-pill p-2 px-3 m-0 border-0"
+                style="background: #f8e9f1; color: #b9206b; cursor: pointer;"
+                (click)="toggleRemoveMenu()">
+          <i class="fa-solid fa-minus"></i>
+        </button>
+
+        @if (showRemoveMenu) {
+          <div class="dropdown-menu show shadow-sm" style="position: absolute; top: 120%; left: 0; z-index: 1000; min-width: 150px;">
+            @if (activeUser()!.favoriteTypes!.length) {
+              @for (favoriteType of activeUser()?.favoriteTypes; track $index) {
+                <button type="button" class="dropdown-item" (click)="removeFavoriteType(favoriteType)">
+                  {{ favoriteType }}
+                </button>
+              }
+            } @else {
+              <div class="p-2 text-muted text-center" style="font-size: 10pt">No favorites to remove!</div>
+            }
+          </div>
+        }
+      </div>
+    <div class=" d-flex justify-content-end gap-3" style="width: 100%">
+      <a class="btn" style="background: rgb(185 32 107 / 0.1);" [routerLink]="`/edit-profile`" >
+        <i class="fa-solid fa-pen-to-square" style="color: #b9206b;"></i> Edit
+      </a>
+
+      <button type="button" class="btn" style="background: #f8e9f1;" (click)="doLogout()" >
+        <i class="fa-solid fa-right-from-bracket" style="color: #b9206b; "></i>Logout
+      </button>
+    </div>
+    </div>
+  </div>
+
+</div>
+
+
+<div class="card mt-3 mb-3" >
+  <div class="card-header" style="background: rgb(185 32 107 / 0.1)">
+    <h5>Cart</h5>
+  </div>
+  @if (activeUser()!.data.length > 0) {
+    <div class="card-body " >
+    @for (order of activeUser()?.data; track $index){
+      @if (order.items.status == "active" && order.items.cartItems.length == 0) {
+        <p class="mt-5 mb-5  text-center">Cart is currently empty! You can add toys on the starting page.</p>
+      }
+    }
+    @for (order of activeUser()?.data; track $index){
+      @if (order.items.status == "active" && order.items.cartItems.length > 0){
+        <table class="table mb-3" style="border-color: rgb(185 32 107 / 0.2)">
+          <thead>
+          <tr>
+            <th scope="col">Item</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Price</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (order of activeUser()?.data; track $index){
+              @if (order.items.status == "active") {
+                @for (item of order.items.cartItems; track $index) {
+                  <tr>
+                    <th scope="row">{{item.item.name}}</th>
+                    <td>{{item.quantity}}</td>
+                    <td>{{item.quantity * item.item.price | number:'1.2-2'}}</td>
+                  </tr>
+                }
+              }
+            }
+          </tbody>
+        </table>
+
+        <div class=" d-flex justify-content-end gap-3 mb-3" style="width: 100%">
+          <a class="btn" style="background: rgb(185 32 107 / 0.1);" [routerLink]="`/cart`" >
+            <i class="fa-solid fa-pen-to-square" style="color: #b9206b;"></i> View Details & Checkout
+          </a>
+        </div>
+      }
+    }
+    </div>
+  }
+</div>
+
+<div class="card">
+  <div class="card-header" style="background: rgb(185 32 107 / 0.1)">
+    <h5>Orders</h5>
+  </div>
+  @if (activeUser()!.data.length > 0) {
+    <div class="card-body mt-3">
+          @for (order of activeUser()?.data; track $index){
+            @if (order.items.status != 'active') {
+
+              <table class="table mb-5 caption-top" style="border-color: rgb(185 32 107 / 0.2)">
+                <thead>
+                <tr>
+                  <th scope="col">Order id: {{order.orderId}}</th>
+                  <th scope="col">Time: {{order.time| date:'mediumDate'  }}</th>
+                  <th scope="col">Status: {{ statusMap[order.status] || order.status }}</th>
+                  <th scope="col"></th>
+                  <th scope="col">Options</th>
+                </tr>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
+                  <th scope="col">
+                    @if (order.status === 'pay later') {
+                      <button class="btn btn-light py-1 mx-3" style="color: #b9206b" (click)="pay(order)">
+                        <i class="fa-solid fa-credit-card" style="color: #b9206b;"></i>Pay
+                      </button>
+                      <button class="btn btn-light py-1 mx-3" style="color: #b9206b"  (click)="cancel(order)">
+                        <i class="fa-solid fa-xmark" style="color: #b9206b;"></i>Cancel
+                      </button>
+                    } @else if (order.status === 'paid' || order.status === 'preparing' || order.status === 'out for delivery') {
+                      <button class="btn btn-light py-1 mx-3" style="color: #b9206b"  (click)="nextState(order)">
+                        <i class="fa-solid fa-forward" style="color: #b9206b;"></i>Next Step
+                      </button>
+                    } @else if (order.status === 'delivered') {
+                      <button class="btn btn-light py-1 mx-3" style="color: #b9206b" (click)="confirmDelivery(order)">
+                        <i class="fa-solid fa-clipboard-check" style="color: #b9206b;"></i>Confirm Delivery
+                      </button>
+                    }
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+              @for (item of order.items.cartItems; track $index) {
+                <tr>
+                  <td scope="row">{{item.item.name}}</td>
+                  <td>{{item.quantity}}</td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    @if (order.status === 'waiting for review') {
+                      <a class="btn btn-light py-1 mx-3" style="color: #b9206b"  [routerLink]="['/toy', item.item.permalink]">
+                        <i class="fa-solid fa-pen-to-square" style="color: #b9206b;"></i> Leave a review
+                      </a>
+                    }
+                  </td>
+                </tr>
+              }
+                </tbody>
+              </table>
+            }
+          }
+    </div>
+  } @else {
+    <div class="card-body">
+      <p class="text-center">No orders yet!</p>
+    </div>
+
+  }
+
+</div>

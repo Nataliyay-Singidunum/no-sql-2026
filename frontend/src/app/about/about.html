@@ -1,0 +1,42 @@
+
+<h1 class="h3 mt-3">About the app</h1>
+<p>Izvorni kod sa vežbi iz predmeta Interakcija čovek računar na 4. godini Tehničkog Fakulteta Univerziteta Singidunum.</p>
+<p>Aplikacija je razvijena koristeći sledeće tehnologije:</p>
+<ul>
+  <li>Angular 20</li>
+  <li>Bootstrap 5.3</li>
+  <li>Fonts Awesome 7</li>
+  <li>Axios HTTP Client</li>
+  <li>Rasa Open Source</li>
+</ul>
+<br/>
+<h2 class="h3 mb-3">Pokretanje projekta</h2>
+<p class="mb-3">Kako bi pokrenuli projekat potrebno je da posedujete Node 22 i Bun runtime na vašem računaru. Aplikaciju pokrećete uz pomoć komande "bun start".</p>
+<p>Da bi pokrenuli i chatbot potrebno je otvoriti jos 2 terminala:</p>
+<ol class="mb-3">
+  <li>
+    Za treniranje modela
+    <ul>
+      <li>Otvoriti chatbot folder ovog projekta</li>
+      <li>Pokrenuti rasabot okruzenje komandom "conda activate rasabot"</li>
+      <li>Trenirati model komandom "rasa train"</li>
+      <li>Nakon zavrsenog treniranja pokrenuti "rasa run --enable-api --cors "*""</li>
+    </ul>
+  </li>
+  <li>
+    Za akcije
+    <ul>
+      <li>Otvoriti isti chatbot folder ovog projekta kao i za treniranje</li>
+      <li>Pokrenuti rasabot okruzenje komandom "conda activate rasabot"</li>
+      <li>Pokrenuti akxije komandom "rasa run actions"</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="d-flex flex-column align-items-center text-center" >
+  <div class="d-flex flex-column align-items-center text-center">
+
+    <img src="/alisa_rawr.jpeg" class="rounded-2" style="width: 60%;">
+    <p class="d-flex mb-0 text-secondary">Project inspiration and collaboration sponsored by &copy;Alisa</p>
+  </div>
+</div>

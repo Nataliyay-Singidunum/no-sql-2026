@@ -1,0 +1,180 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - thanks
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+  - hello_world
+  - all_toys
+  - new_toys
+  - toys_by_name
+  - toys_by_description
+  - toys_by_type
+  - toys_by_price
+  - toys_by_age
+  - toys_by_target_group
+  - toys_by_date
+  - toys_by_rating
+  - pick_toy:
+      use_entities: [ ]
+  - add_to_cart
+  - show_cart
+  - continue_shopping
+  - order_toys
+
+
+entities:
+  - toy_name
+  - toy_permalink
+  - toy_description
+  - toy_type
+  - toy_price
+  - toy_age
+  - toy_target_group
+  - toy_date
+  - toy_rating
+  - picked_toy
+
+
+slots:
+  toy_name:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: toy_name
+
+  toy_permalink:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  toy_description:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: toy_description
+
+  toy_type:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: toy_type
+
+  toy_price:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: toy_price
+
+  toy_age:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: toy_age
+
+  toy_target_group:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: toy_target_group
+
+  toy_date:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: toy_date
+
+  toy_rating:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: toy_rating
+
+  picked_toy:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: picked_toy
+
+
+responses:
+  utter_greet:
+  - text: "Hey! How are you?"
+
+  utter_cheer_up:
+  - text: "Here is something to cheer you up:"
+    image: "https://i.imgur.com/nGF1K8f.jpg"
+
+  utter_did_that_help:
+  - text: "Did that help you?"
+
+  utter_happy:
+  - text: "Great, carry on!"
+
+  utter_goodbye:
+  - text: "Bye! "
+
+  utter_iamabot:
+  - text: "I am a bot, powered by Rasa."
+
+  utter_sorry:
+    - text: "Sorry, please try to find your toy again. "
+
+  utter_youre_welcome:
+    - text: "Np!! hihi ^^ "
+
+  utter_confirm_order:
+  - text: "Please confirm your order: "
+
+  utter_choose_count:
+  - text: "Please choose the number of tickets you want to purchase: "
+
+  utter_choose_toy:
+    - text: "What toy would you like to add to your cart? "
+
+  utter_keep_shopping:
+    - text: "Would you like to continue shopping? "
+
+  utter_order_toys:
+    - text: "Would you like to place an order? "
+
+  utter_cart_saved:
+    - text: "No worries, your cart has been saved. You can come back to check out any time! "
+
+actions:
+  - action_hello_world
+  - action_all_toys
+  - action_new_toys
+  - action_toys_by_name
+  - action_toys_by_description
+  - action_toys_by_type
+  - action_toys_by_price
+  - action_toys_by_age
+  - action_toys_by_target_group
+  - action_toys_by_date
+  - action_toys_by_rating
+  - action_pick_toy
+  - action_add_to_cart
+  - action_show_cart
+  - action_keep_shopping
+  - action_order_toys
+
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

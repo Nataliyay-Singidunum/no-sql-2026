@@ -1,0 +1,363 @@
+import { Component, signal, ChangeDetectorRef } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { UserService } from '../services/user.service';
+import { Utils } from './utils';
+import { MessageModel } from '../models/message.model';
+import { RasaService } from '../services/rasa.service';
+import { FormsModule } from '@angular/forms';
+import { v4 as uuidv4 } from 'uuid';
+import { ToyModel } from '../models/toy.model';
+import { DecimalPipe } from '@angular/common';
+import { ReviewService } from '../services/review.service';
+import { ToyService } from '../services/toy.service';
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule],
+  providers: [DecimalPipe],
+  templateUrl: './app.html',
+  styleUrl: './app.css',
+})
+export class App {
+  protected readonly title = signal('interakcija-covek-racunar-2025');
+  protected year = new Date().getFullYear();
+  protected waitingForResponse: boolean = false;
+  protected botThinkingPlaceholder: string = 'Thinking...';
+  protected isChatVisible: boolean = false;
+  protected userMessage: string = '';
+  protected messages: MessageModel[] = [];
+
+  constructor(
+    private router: Router,
+    private utils: Utils,
+    private decimalPipe: DecimalPipe,
+    private cdr: ChangeDetectorRef        // baca update kad stigne poruka da ne mora da se ukliktava
+  ) {
+    this.messages.push({
+      type: 'bot',
+      text: 'Hiiii! How can I help? :) ',
+    });
+  }
+
+  toggleChat() {
+    this.isChatVisible = !this.isChatVisible;
+  }
+
+  protected noAccessAlert(){
+    this.utils.showAlert("Please log in to access your cart!")
+  }
+
+  protected getAverageRating(toyId: number): number {
+/*    const revs = ReviewService.getReviewsForToy(toyId);
+    if (revs.length === 0) return 0;
+
+    const sum = revs.reduce((total, review) => total + review.rating, 0);
+    return sum / revs.length;*/
+    //TEMP
+    return 0;
+  }
+
+
+  async sendUserMessage() {
+    if (this.waitingForResponse) {
+      return;
+    }
+
+    const trimmedMessage = this.userMessage.trim();
+    this.userMessage = '';
+
+    this.messages.push({
+      type: 'user',
+      text: trimmedMessage,
+    });
+
+    this.messages.push({
+      type: 'bot',
+      text: this.botThinkingPlaceholder,
+    });
+
+    RasaService.sendMessage(trimmedMessage)
+      .then((rsp) => {
+        if (rsp.data.length == 0) {
+          this.messages.push({
+            type: 'bot',
+            text: "Sorry I didn't understand your question. Please try again.",
+          });
+          localStorage.setItem('icr_sender_id', uuidv4()); // posle 3 dana konacno fix za multiple orders in one session
+          this.removeBotPlaceholder();
+          return;
+        }
+
+        for (let message of rsp.data) {
+          if (message.attachment != null) {
+            if (message.attachment.type == 'toy_list' && Array.isArray(message.attachment.data)) {
+              let html = '';
+              for (let toy of message.attachment.data as ToyModel[]) {
+                html += '<ul class="list-unstyled mb-3">';
+                html += `<li class="d-flex align-items-baseline justify-content-between mb-0">
+                          <h6 class="mb-0">${toy.name}</h6>
+                          <p class="mb-0 pink-subtle">
+                          ${this.decimalPipe.transform(this.getAverageRating(toy.toyId), '1.2-2')}
+                          <i class="fa-solid fa-star"></i></p></li>`;
+                html += `<li class="text-secondary mb-1">${toy.productionDate}</li>`;
+                html += `<li> ${toy.description}</li>`;
+
+                html += '<li class="mt-1">';
+                html += `<p class="badge rounded-pill bg-secondary p-2 mb-0">${toy.ageGroup.name} </p>`;
+                if (toy.targetGroup == 'dečak') {
+                  html +=
+                    '<p  class="badge rounded-pill bg-primary-subtle p-2 mx-2 mb-1 text-primary" >dečaci</p>';
+                } else if (toy.targetGroup == 'devojčica') {
+                  html += `<p  class="badge rounded-pill p-2 mx-2 color-pink mb-1" >devojčice</p>`;
+                } else {
+                  html += `<p  class="badge rounded-pill bg-secondary-subtle p-2 mx-2 mb-1 text-secondary"> ${toy.targetGroup}</p>`;
+                }
+                html += `<p class="badge rounded-pill bg-secondary p-2 mb-0">${toy.type.name} </p>`;
+                html += '</li>';
+                html += `<li><img style="max-width: 50px;" src="https://raw.githubusercontent.com/Pequla/express-toys-api/refs/heads/main/src/public${toy.imageUrl}" class="card-img-top mb-1 rounded-1" [alt]="toy.name"></li>`;
+                html += `<li><b>Cena: ${this.decimalPipe.transform(toy.price, '1.2-2')} RSD</b></li>`;
+                html += '</hr>';
+                html += `<li><a href="/toy/${toy.permalink}">More details...</a></li>`;
+                html += `<li class="my-3"><hr></li>`;
+                html += `</ul>`;
+              }
+              this.messages.push({
+                type: 'bot',
+                text: html,
+              });
+            }
+
+            if (message.attachment.type == 'toy') {
+              let html = '';
+              let toy = message.attachment.data;
+
+              html += '<ul class="list-unstyled mb-3">';
+              html += `<li class="d-flex align-items-baseline justify-content-between mb-0">
+                        <h6 class="mb-0">${toy.name}</h6>
+                        <p class="mb-0 pink-subtle">
+                        ${this.decimalPipe.transform(this.getAverageRating(toy.toyId), '1.2-2')}
+                        <i class="fa-solid fa-star"></i></p></li>`;
+              html += `<li class="text-secondary mb-1">${toy.productionDate}</li>`;
+              html += `<li> ${toy.description}</li>`;
+
+              html += '<li class="mt-1">';
+              html += `<p class="badge rounded-pill bg-secondary p-2 mb-0">${toy.ageGroup.name} </p>`;
+              if (toy.targetGroup == 'dečak') {
+                html +=
+                  '<p  class="badge rounded-pill bg-primary-subtle p-2 mx-2 mb-1 text-primary" >dečaci</p>';
+              } else if (toy.targetGroup == 'devojčica') {
+                html += `<p  class="badge rounded-pill p-2 mx-2 color-pink mb-1" >devojčice</p>`;
+              } else {
+                html += `<p  class="badge rounded-pill bg-secondary-subtle p-2 mx-2 mb-1 text-secondary"> ${toy.targetGroup}</p>`;
+              }
+              html += `<p class="badge rounded-pill bg-secondary p-2 mb-0">${toy.type.name} </p>`;
+              html += '</li>';
+              html += `<li><img style="max-width: 50px;" src="https://raw.githubusercontent.com/Pequla/express-toys-api/refs/heads/main/src/public${toy.imageUrl}" class="card-img-top mb-1 rounded-1" [alt]="toy.name"></li>`;
+              html += `<li><b>Cena: ${this.decimalPipe.transform(toy.price, '1.2-2')} RSD</b></li>`;
+              html += '</hr>';
+              html += `<li><a href="/toy/${toy.permalink}">More details...</a></li>`;
+              html += `<li class="my-3"><hr></li>`;
+              html += `</ul>`;
+
+              this.messages.push({
+                type: 'bot',
+                text: html,
+              });
+            }
+
+
+            if (message.attachment.type == 'toy_rating_list' && message.attachment.data) {
+              const criteriaString = String(message.attachment.data).replace(/[^0-9.]/g, '');
+              const minRating = parseFloat(criteriaString) || 0;
+
+              ToyService.getToys().then((rsp) => {
+                const allToys = rsp.data;
+                let toys = allToys.filter((toy: ToyModel) => {
+                  return this.getAverageRating(toy.toyId) >= minRating;
+                });
+
+                let html = '';
+                for (let toy of toys as ToyModel[]) {
+                  html += '<ul class="list-unstyled mb-3">';
+                  html += `<li class="d-flex align-items-baseline justify-content-between mb-0">
+                          <h6 class="mb-0">${toy.name}</h6>
+                          <p class="mb-0 pink-subtle">
+                          ${this.decimalPipe.transform(this.getAverageRating(toy.toyId), '1.2-2')}
+                          <i class="fa-solid fa-star"></i></p></li>`;
+                  html += `<li class="text-secondary mb-1">${toy.productionDate}</li>`;
+                  html += `<li> ${toy.description}</li>`;
+
+                  html += '<li class="mt-1">';
+                  html += `<p class="badge rounded-pill bg-secondary p-2 mb-0">${toy.ageGroup.name} </p>`;
+                  if (toy.targetGroup == 'dečak') {
+                    html +=
+                      '<p  class="badge rounded-pill bg-primary-subtle p-2 mx-2 mb-1 text-primary" >dečaci</p>';
+                  } else if (toy.targetGroup == 'devojčica') {
+                    html += `<p  class="badge rounded-pill p-2 mx-2 color-pink mb-1" >devojčice</p>`;
+                  } else {
+                    html += `<p  class="badge rounded-pill bg-secondary-subtle p-2 mx-2 mb-1 text-secondary"> ${toy.targetGroup}</p>`;
+                  }
+                  html += `<p class="badge rounded-pill bg-secondary p-2 mb-0">${toy.type.name} </p>`;
+                  html += '</li>';
+                  html += `<li><img style="max-width: 50px;" src="https://raw.githubusercontent.com/Pequla/express-toys-api/refs/heads/main/src/public${toy.imageUrl}" class="card-img-top mb-1 rounded-1" [alt]="toy.name"></li>`;
+                  html += `<li><b>Cena: ${this.decimalPipe.transform(toy.price, '1.2-2')} RSD</b></li>`;
+                  html += '</hr>';
+                  html += `<li><a href="/toy/${toy.permalink}">More details...</a></li>`;
+                  html += `<li class="my-3"><hr></li>`;
+                  html += `</ul>`;
+                }
+                this.messages.push({
+                  type: 'bot',
+                  text: html,
+                });
+
+                this.cdr.detectChanges();
+              });
+            }
+
+
+            // simple list
+            if (message.attachment.type == 'simple_list') {
+              let html = `<ul class='list-unstyled'>`;
+              for (let obj of message.attachment.data) {
+                html += `<li>${obj}</li>`;
+              }
+              html += `</ul>`;
+              this.messages.push({
+                type: 'bot',
+                text: html,
+              });
+            }
+
+            // add to cart
+            if (message.attachment.type == 'cart_item') {
+              let toy = message.attachment.data;
+
+              UserService.createCartItem({
+                item: toy,
+                quantity: 1,
+                status: 'na'
+              })
+
+              let confirmation = "Cart updated!";
+              this.messages.push({
+                type: 'bot',
+                text: confirmation,
+              });
+            }
+
+
+            // show cart
+            if (message.attachment.type == 'show_cart') {
+              let html = '';
+              const user = UserService.getActiveUser();
+              let activeCart = null;
+
+              if (user && user.data) {
+                for (let order of user.data) {
+                  if (order.items.status === 'active') {
+                    activeCart = order.items;
+                    break;
+                  }
+                }
+              }
+
+              if (!activeCart || !activeCart.cartItems || activeCart.cartItems.length === 0) {
+                html =
+                  '<i>Your cart is currently empty! You can add toys on the starting page.</i>';
+              } else {
+                html = '<ul class="m-1 p-0">';
+                let total = 0;
+
+                for (let cartItem of activeCart.cartItems) {
+                  let toy = cartItem.item;
+                  let qty = cartItem.quantity;
+                  let itemTotal = toy.price * qty;
+                  total += itemTotal;
+
+                  html += `<li class="d-flex justify-content-between gap-2">
+                    <div class="mb-1" style="margin-right: 5px">
+                      <p class="my-0">${toy.name}</p>
+                      <small class="text-muted">Quantity: ${qty}</small>
+                    </div>
+                    <span class="text-muted">${this.decimalPipe.transform(itemTotal, '1.2-2')} RSD</span>
+                  </li>`;
+                }
+                html += `<li class="d-flex justify-content-between" style="background: rgb(185 32 107 / 0.1)">
+                <span><b>Total price</b></span>
+                <strong>${this.decimalPipe.transform(total, '1.2-2')} RSD</strong>
+                </li>`;
+                html += '</ul>';
+              }
+              this.messages.push({
+                type: 'bot',
+                text: html,
+              });
+            }
+
+            if (message.attachment.type == 'place_order') {
+
+              UserService.createOrder()
+
+              let confirmation = 'Order placed!';
+              this.messages.push({
+                type: 'bot',
+                text: confirmation,
+              });
+            }
+
+          }
+          this.messages.push({
+            type: 'bot',
+            text: message.text,
+          });
+        }
+
+        this.messages = this.messages.filter((m) => {
+          if (m.type === 'bot') {
+            return m.text != this.botThinkingPlaceholder;
+          }
+          return true;
+        });
+        this.cdr.detectChanges();
+      })
+      .catch(() => {
+        this.removeBotPlaceholder();
+        this.messages.push({
+          type: 'error',
+          text: 'Sorry, something went wrong. Please try again.',
+        });
+      });
+  }
+
+
+  removeBotPlaceholder() {
+    this.messages = this.messages.filter((m) => {
+      if (m.type === 'bot') {
+        return m.text != this.botThinkingPlaceholder;
+      }
+      return true;
+    });
+  }
+
+  getUserName() {
+    const user = UserService.getActiveUser();
+    return `${user.firstName} ${user.lastName}`;
+  }
+
+  hasAuth() {
+    return UserService.hasAuth();
+  }
+
+  doLogout() {
+    this.utils.showDialog(
+      'Are you sure you want to logout?',
+      () => {
+        UserService.logout();
+        this.router.navigate(['/login']);
+      },
+      'Logout',
+      'Cancel',
+    );
+  }
+}

@@ -1,0 +1,23 @@
+import { Routes } from '@angular/router';
+import { Home } from './home/home';
+import { About } from './about/about';
+import { Login } from './login/login';
+import { Signup } from './signup/signup';
+import { Profile } from './profile/profile';
+import { Toy } from './toy/toy';
+import { Contact } from './contact/contact';
+import { Cart } from './cart/cart';
+import { EditProfile } from './edit-profile/edit-profile';
+
+export const routes: Routes = [
+  { path: '', title: 'Home', component: Home },
+  { path: 'about', title: 'About', component: About },
+  { path: 'contact', title: 'Contact', component: Contact },
+  { path: 'login', title: 'Login', component: Login },
+  { path: 'signup', title: 'SignUp', component: Signup },
+  { path: 'toy/:path', title: 'Toy', component: Toy },
+  { path: 'profile', title: 'Profile', component: Profile },
+  { path: 'edit-profile', title: 'Edit Profile', component: EditProfile },
+  { path: 'cart', title: 'Cart', component: Cart },
+  { path: '**', title: 'Home', component: Home },
+];

@@ -1,0 +1,86 @@
+version: "3.1"
+
+stories:
+
+- story: happy path
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_great
+  - action: utter_happy
+
+- story: sad path 1
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - action: utter_did_that_help
+  - intent: affirm
+  - action: utter_happy
+
+- story: sad path 2
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - action: utter_did_that_help
+  - intent: deny
+  - action: utter_goodbye
+
+  # case 1
+- story: Add to cart - deny
+  steps:
+  - intent: add_to_cart
+  - action: utter_choose_toy
+  - intent: pick_toy
+  - action: action_pick_toy
+  - intent: deny
+  - action: utter_sorry
+
+  # case 2
+- story: Add to cart - affirm - keep shopping - affirm
+  steps:
+  - intent: add_to_cart
+  - action: utter_choose_toy
+  - intent: pick_toy
+  - action: action_pick_toy
+  - intent: affirm
+  - action: action_add_to_cart
+  - action: utter_keep_shopping
+  - intent: affirm
+  - action: action_keep_shopping
+
+  # case 3
+- story: Add to cart - affirm - keep shopping - deny - order
+  steps:
+  - intent: add_to_cart
+  - action: utter_choose_toy
+  - intent: pick_toy
+  - action: action_pick_toy
+  - intent: affirm
+  - action: action_add_to_cart
+  - action: utter_keep_shopping
+  - intent: deny
+  - action: utter_order_toys
+  - action: action_show_cart
+  - intent: affirm
+  - action: action_order_toys
+
+  # case 4
+- story: Add to cart - affirm - keep shopping - deny - cancelled order
+  steps:
+  - intent: add_to_cart
+  - action: utter_choose_toy
+  - intent: pick_toy
+  - action: action_pick_toy
+  - intent: affirm
+  - action: action_add_to_cart
+  - action: utter_keep_shopping
+  - intent: deny
+  - action: utter_order_toys
+  - action: action_show_cart
+  - intent: deny
+  - action: utter_cart_saved
+  - action: utter_goodbye
