@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import { Toy } from './models/toy.model';
-import { Review } from './models/review';
+import { Review } from './models/review.model';
 
 const app = express();
 
