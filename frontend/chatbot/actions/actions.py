@@ -33,7 +33,7 @@ class ActionAllToys(Action):
           tracker: Tracker,
           domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -57,7 +57,7 @@ class ActionNewToys(Action):
           tracker: Tracker,
           domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -87,7 +87,7 @@ class ActionToysByName(Action):
       dispatcher.utter_message(text="I didn't quite catch the name. Could you type it again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -117,7 +117,7 @@ class ActionToysByDescription(Action):
       dispatcher.utter_message(text="I didn't quite catch the description. Could you type it again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -147,7 +147,7 @@ class ActionToysByType(Action):
       dispatcher.utter_message(text="I didn't quite catch the type. Could you type it again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -178,7 +178,7 @@ class ActionToysByPrice(Action):
       dispatcher.utter_message(text="I didn't quite catch the price. Could you type it again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -223,7 +223,7 @@ class ActionToysByAge(Action):
       dispatcher.utter_message(text="I didn't quite catch the age group. Could you type it again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -253,7 +253,7 @@ class ActionToysByTargetGroup(Action):
       dispatcher.utter_message(text="I didn't quite catch the target group. Could you type it again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -284,7 +284,7 @@ class ActionToysByDate(Action):
       dispatcher.utter_message(text="I didn't quite catch the date. Could you type it again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -359,7 +359,7 @@ class ActionPickToy(Action):
       dispatcher.utter_message(text="I didn't quite catch the name. Could you type it again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
@@ -397,7 +397,7 @@ class ActionAddToCart(Action):
       dispatcher.utter_message(text="I forgot what toy you were looking for. Could you try again?")
       return []
 
-    url="https://toy.pequla.com/api/toy"
+    url="http://localhost:3000/api/toy"
     rsp = requests.get(url)
     toys = rsp.json()
 
