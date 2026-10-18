@@ -35,7 +35,7 @@ export class App {
   ) {
     this.messages.push({
       type: 'bot',
-      text: 'Hiiii! How can I help? :) ',
+      text: 'Hello! How can I help? :) ',
     });
   }
 
