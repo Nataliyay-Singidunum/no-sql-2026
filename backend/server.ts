@@ -19,15 +19,32 @@ app.get('/', (req, res) => {
     res.send('API is running smoothly!');
 });
 
-// All yoys
 app.get('/api/toy', async (req, res) => {
     try {
-        const toys = await Toy.find();
+        // Destructure potential query parameters sent by Angular or Rasa
+        const { search, genre, targetGroup, typeName } = req.query;
+        const query: any = {};
+
+        if (search) {
+            query.name = { $regex: search as string, $options: 'i' };
+        }
+
+
+        if (targetGroup) {
+            query.targetGroup = targetGroup;
+        }
+        if (typeName) {
+            query['type.name'] = typeName;
+        }
+
+        const toys = await Toy.find(query);
         res.json(toys);
+
     } catch (error) {
+        console.error("Error filtering toys:", error);
         res.status(500).json({ message: "Failed to fetch toys" });
     }
-});
+    });
 
 // Details
 app.get('/api/toy/permalink/:permalink', async (req, res) => {
