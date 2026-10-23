@@ -19,32 +19,76 @@ app.get('/', (req, res) => {
     res.send('API is running smoothly!');
 });
 
+// All toys / filters
 app.get('/api/toy', async (req, res) => {
     try {
-        // Destructure potential query parameters sent by Angular or Rasa
-        const { search, genre, targetGroup, typeName } = req.query;
-        const query: any = {};
+        const {
+            searchCriteria, searchText,
+            typeName, ageGroup, targetGroup,
+            productionDate, price, review
+        } = req.query;
 
-        if (search) {
-            query.name = { $regex: search as string, $options: 'i' };
+        const matchStage: any = {};
+
+        // searcch
+        if (searchText) {
+            const field = searchCriteria === 'Description' ? 'description' : 'name';
+            matchStage[field] = { $regex: searchText as string, $options: 'i' };
         }
 
+        // dropdown
+        if (typeName && typeName !== 'All Types') matchStage['type.name'] = typeName;
+        if (ageGroup && ageGroup !== 'All Age Groups') matchStage['ageGroup.name'] = ageGroup;
+        if (targetGroup && targetGroup !== 'All Types' && targetGroup !== 'all') matchStage.targetGroup = targetGroup;
 
-        if (targetGroup) {
-            query.targetGroup = targetGroup;
-        }
-        if (typeName) {
-            query['type.name'] = typeName;
+        // dates
+        if (productionDate === '2025 Half 1 (Jan-Jun)') {
+            matchStage.productionDate = { $gte: new Date('2025-01-01'), $lte: new Date('2025-06-30') };
+        } else if (productionDate === '2024 Half 2 (Jul-Dec)') {
+            matchStage.productionDate = { $gte: new Date('2024-07-01'), $lte: new Date('2024-12-31') };
         }
 
-        const toys = await Toy.find(query);
+        // prices
+        if (price === 'Under 1,500 RSD') matchStage.price = { $lt: 1500 };
+        else if (price === '1,500 - 3,000 RSD') matchStage.price = { $gte: 1500, $lte: 3000 };
+        else if (price === '3,000 - 5,000 RSD') matchStage.price = { $gte: 3000, $lte: 5000 };
+        else if (price === 'Over 5,000 RSD') matchStage.price = { $gt: 5000 };
+
+        // reviews
+        if (review && review !== 'Any') {
+            const minScore = parseFloat((review as string).replace('+', ''));
+
+            const toysWithReviews = await Toy.aggregate([
+                { $match: matchStage }, // Apply all standard filters first
+                {
+                    $lookup: {
+                        from: 'reviews', // Mongoose automatically lowercase-plurals your Review model
+                        localField: 'toyId',
+                        foreignField: 'toyId',
+                        as: 'reviewsData'
+                    }
+                },
+                {
+                    $addFields: {
+                        avgRating: { $avg: '$reviewsData.rating' } // Calculate average per toy
+                    }
+                },
+                {
+                    $match: { avgRating: { $gte: minScore } } // Keep only toys meeting the rating threshold
+                },
+                { $project: { reviewsData: 0, avgRating: 0 } } // Clean output to match standard ToyModel
+            ]);
+            return res.json(toysWithReviews);
+        }
+        
+        const toys = await Toy.find(matchStage);
         res.json(toys);
 
     } catch (error) {
         console.error("Error filtering toys:", error);
         res.status(500).json({ message: "Failed to fetch toys" });
     }
-    });
+});
 
 // Details
 app.get('/api/toy/permalink/:permalink', async (req, res) => {
